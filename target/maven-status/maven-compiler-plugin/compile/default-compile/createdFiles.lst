@@ -1,0 +1,4 @@
+models\LOAN.class
+models\LOAN_2.class
+com\flink\LoanTransformationJob.class
+models\LOAN_1.class
