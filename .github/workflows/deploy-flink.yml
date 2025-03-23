@@ -31,7 +31,7 @@ jobs:
 
       - name: Configure kubectl
         run: |
-          aws eks update-kubeconfig --name my-cluster
+          aws eks update-kubeconfig --name my-eks-cluster
 
       - name: Deploy to EKS
         run: |
