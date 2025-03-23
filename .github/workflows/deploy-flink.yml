@@ -31,7 +31,14 @@ jobs:
 
       - name: Configure kubectl
         run: |
-          aws eks update-kubeconfig --name my-eks-cluster
+          aws eks update-kubeconfig --name my-eks-cluster --region us-east-1
+          kubectl get nodes
+
+      - name: Debug Kubeconfig
+        run: |
+          echo "Checking Kubernetes context..."
+          kubectl config view
+          kubectl config current-context
 
       - name: Deploy to EKS
         run: |
