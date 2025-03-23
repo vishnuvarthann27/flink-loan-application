@@ -1,4 +1,4 @@
-package models;
+package com.flink.models;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonFormat;
@@ -41,6 +41,10 @@ public class LOAN {
 
     @JsonProperty("issur_nbr")
     private String issur_nbr;
+
+    @JsonProperty("created_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+    private Date createdTimestamp;
 
     @JsonCreator
     public LOAN() {
@@ -116,5 +120,13 @@ public class LOAN {
 
     public void setIssur_nbr(String issur_nbr) {
         this.issur_nbr = issur_nbr;
+    }
+
+    public Date getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(Date createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 }

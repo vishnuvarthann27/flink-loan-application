@@ -1,9 +1,11 @@
 package com.flink;
 
-import models.LOAN;
-import models.LOAN_1;
-import models.LOAN_2;
+import com.flink.models.LOAN;
+import com.flink.models.LOAN_1;
+import com.flink.models.LOAN_2;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
@@ -36,24 +38,25 @@ public class LoanTransformationJob {
         }
 
         KafkaSource<LOAN_1> kafkaLoanSource1 =  KafkaSource.<LOAN_1>builder()
-                                                        .setProperties(consumerConfig)
-                                                        .setTopics("LOAN_1")
-                                                        .setStartingOffsets(OffsetsInitializer.latest())
-                                                        .setValueOnlyDeserializer(new JsonDeserializationSchema<>(LOAN_1.class))
-                                                        .build();
+                .setProperties(consumerConfig)
+                .setTopics("LOAN_1")
+                .setStartingOffsets(OffsetsInitializer.latest())
+                .setValueOnlyDeserializer(new JsonDeserializationSchema<>(LOAN_1.class))
+                .build();
 
         KafkaSource<LOAN_2> kafkaLoanSource2 =  KafkaSource.<LOAN_2>builder()
-                                                        .setProperties(consumerConfig)
-                                                        .setTopics("LOAN_2")
-                                                        .setStartingOffsets(OffsetsInitializer.latest())
-                                                        .setValueOnlyDeserializer(new JsonDeserializationSchema<>(LOAN_2.class))
-                                                        .build();
+                .setProperties(consumerConfig)
+                .setTopics("LOAN_2")
+                .setStartingOffsets(OffsetsInitializer.latest())
+                .setValueOnlyDeserializer(new JsonDeserializationSchema<>(LOAN_2.class))
+                .build();
 
         DataStream<LOAN_1 > loanStream1 = env.fromSource(kafkaLoanSource1, WatermarkStrategy.noWatermarks(), "loan_source_1");
         DataStream<LOAN_2 > loanStream2 = env.fromSource(kafkaLoanSource2, WatermarkStrategy.noWatermarks(), "loan_source_2");
 
         KafkaRecordSerializationSchema<LOAN> loanSerializer = KafkaRecordSerializationSchema.<LOAN>builder()
                 .setTopic("LOAN")
+                .setKeySerializationSchema(loan -> String.valueOf(loan.getInvstr_loan_nbr()).getBytes())
                 .setValueSerializationSchema(new JsonSerializationSchema<LOAN>(
                         () -> {
                             return new ObjectMapper()
@@ -72,6 +75,15 @@ public class LoanTransformationJob {
         defineWorkflow(loanStream1, loanStream2)
                 .sinkTo(loanSink)
                 .name("loan_sink");
+
+        env.setRestartStrategy(RestartStrategies.exponentialDelayRestart(
+                Time.seconds(5),
+                Time.minutes(1),
+                2.0,
+                Time.minutes(5),
+                0.1
+
+        ));
 
         env.execute("LOAN_TRANSFORMATION");
     }

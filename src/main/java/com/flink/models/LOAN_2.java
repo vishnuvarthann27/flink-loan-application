@@ -1,6 +1,7 @@
-package models;
+package com.flink.models;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -54,6 +55,10 @@ public class LOAN_2 {
 
     @JsonProperty("issur_nbr")
     private String issur_nbr;
+
+    @JsonProperty("created_timestamp")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
+    private Date createdTimestamp;
 
     @JsonCreator
     public LOAN_2() {
@@ -179,6 +184,22 @@ public class LOAN_2 {
         this.issur_nbr = issur_nbr;
     }
 
+    public Date getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(Date createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public String getFirst_payment_date_month() {
+        return first_payment_date_month;
+    }
+
+    public void setFirst_payment_date_month(String first_payment_date_month) {
+        this.first_payment_date_month = first_payment_date_month;
+    }
+
     public LOAN toLOANFormat() {
         LOAN loan = new LOAN();
 
@@ -192,6 +213,7 @@ public class LOAN_2 {
             loan.setLoan_mtr_dt(parseDate(loan_mtr_dt_year, loan_mtr_dt_month, loan_mtr_dt_date));
             loan.setInvstr_cd(invstr_cd);
             loan.setIssur_nbr(issur_nbr);
+            loan.setCreatedTimestamp(createdTimestamp);
         } catch (NumberFormatException e) {
             System.err.println("Error converting number: " + e.getMessage());
         } catch (ParseException e) {
